@@ -10,7 +10,7 @@ export default class Ui {
   /**
    * @param {object} ui - video tool Ui module
    * @param {object} ui.api - Editor.js API
-   * @param {ImageConfig} ui.config - user config
+   * @param {VideoConfig} ui.config - user config
    * @param {Function} ui.onSelectFile - callback for clicks on Select file button
    * @param {boolean} ui.readOnly - read-only mode flag
    */
@@ -128,9 +128,39 @@ export default class Ui {
    * @returns {void}
    */
   showPreloader(src) {
-    this.nodes.imagePreloader.style.backgroundImage = `url(${src})`;
-
-    this.toggleStatus(Ui.status.UPLOADING);
+    const self = this;
+    const video = document.createElement('video');
+    const timeupdate = function() {
+      if (snapImage()) {
+        video.removeEventListener('timeupdate', timeupdate);
+        video.pause();
+      }
+    };
+    video.addEventListener('loadeddata', function() {
+      if (snapImage()) {
+        video.removeEventListener('timeupdate', timeupdate);
+      }
+    });
+    const snapImage = function() {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+      const image = canvas.toDataURL();
+      const success = image.length > 100000;
+      if (success) {
+        self.nodes.videoPreloader.style.backgroundImage = `url(${image})`;
+        self.toggleStatus(Ui.status.UPLOADING);
+      }
+      return success;
+    };
+    video.addEventListener('timeupdate', timeupdate);
+    video.preload = 'metadata';
+    video.src = src;
+    // Load video in Safari / IE11
+    video.muted = true;
+    video.playsInline = true;
+    video.play();
   }
 
   /**
@@ -139,7 +169,7 @@ export default class Ui {
    * @returns {void}
    */
   hidePreloader() {
-    this.nodes.imagePreloader.style.backgroundImage = '';
+    this.nodes.videoPreloader.style.backgroundImage = '';
     this.toggleStatus(Ui.status.EMPTY);
   }
 
@@ -177,10 +207,10 @@ export default class Ui {
        *
        * @type {boolean}
        */
-      attributes.autoplay = true;
-      attributes.loop = true;
-      attributes.muted = true;
-      attributes.playsinline = true;
+      attributes.autoplay = this.config.autoplay;
+      attributes.loop = this.config.loop;
+      attributes.muted = this.config.mute;
+      attributes.playsinline = this.config.playsinline;
 
       /**
        * Change event to be listened

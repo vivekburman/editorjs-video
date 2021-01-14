@@ -3,7 +3,7 @@
  *
  * @author CodeX <team@codex.so>
  * @license MIT
- * @see {@link https://github.com/editor-js/image}
+ * @see {@link https://github.com/editor-js/video}
  *
  * To developers.
  * To simplify Tool structure, we split it to 4 parts:
@@ -49,12 +49,12 @@ import ToolboxIcon from './svg/toolbox.svg';
 import Uploader from './uploader';
 
 /**
- * @typedef {object} ImageConfig
+ * @typedef {object} videoConfig
  * @description Config supported by Tool
  * @property {object} endpoints - upload endpoints
  * @property {string} endpoints.byFile - upload by file
  * @property {string} endpoints.byUrl - upload by URL
- * @property {string} field - field name for uploaded image
+ * @property {string} field - field name for uploaded video
  * @property {string} types - available mime-types
  * @property {string} captionPlaceholder - placeholder for Caption field
  * @property {object} additionalRequestData - any data to send with requests
@@ -103,7 +103,7 @@ export default class VideoTool {
   /**
    * @param {object} tool - tool properties got from editor.js
    * @param {VideoToolData} tool.data - previously saved data
-   * @param {ImageConfig} tool.config - user config for Tool
+   * @param {videoConfig} tool.config - user config for Tool
    * @param {object} tool.api - Editor.js API
    * @param {boolean} tool.readOnly - read-only mode flag
    */
@@ -125,7 +125,11 @@ export default class VideoTool {
       uploader: config.uploader || undefined,
       actions: config.actions || [],
       defaultElements: config.defaultElements || ['caption', 'withBorder', 'stretched', 'withBackground'],
-      onRemove: config.onRemove || undefined
+      onRemove: config.onRemove || undefined,
+      autoplay: config.autoplay === undefined || true,
+      mute: config.mute === undefined || true,
+      loop: config.loop === undefined || true,
+      playsinline: config.playsinline === undefined || true
     };
 
     /**
@@ -186,7 +190,7 @@ export default class VideoTool {
    *
    * @public
    *
-   * @returns {ImageToolData}
+   * @returns {videoToolData}
    */
   save() {
     const caption = this.ui.nodes.caption;
@@ -197,7 +201,7 @@ export default class VideoTool {
   }
 
   /**
-   * Makes buttons with tunes: add background, add border, stretch image
+   * Makes buttons with tunes: add background, add border, stretch video
    *
    * @public
    *
@@ -208,7 +212,7 @@ export default class VideoTool {
   }
 
   /**
-   * Fires after clicks on the Toolbox Image Icon
+   * Fires after clicks on the Toolbox video Icon
    * Initiates click on the Select File button
    *
    * @public
@@ -231,10 +235,10 @@ export default class VideoTool {
       tags: [ 'video' ],
 
       /**
-       * Paste URL of image into the Editor
+       * Paste URL of video into the Editor
        */
       patterns: {
-        image: /https?:\/\/\S+\.(mp4)$/i,
+        video: /https?:\/\/\S+\.(mp4)$/i,
       },
 
       /**
@@ -297,7 +301,7 @@ export default class VideoTool {
    *
    * @private
    *
-   * @param {VideoToolData} data - data in Image Tool format
+   * @param {VideoToolData} data - data in video Tool format
    */
   set data(data) {
     this.video = data.file;
@@ -348,7 +352,7 @@ export default class VideoTool {
    */
   onUpload(response) {
     if (response.success && response.file) {
-      this.image = response.file;
+      this.video = response.file;
     } else {
       this.uploadingFailed('incorrect response: ' + JSON.stringify(response));
     }
@@ -365,7 +369,7 @@ export default class VideoTool {
     console.log('Video Tool: uploading failed because of', errorText);
 
     this.api.notifier.show({
-      message: this.api.i18n.t('Couldn’t upload image. Please try another.'),
+      message: this.api.i18n.t('Couldn’t upload video. Please try another.'),
       style: 'error',
     });
     this.ui.hidePreloader();
@@ -412,7 +416,7 @@ export default class VideoTool {
   }
 
   /**
-   * Show preloader and upload image file
+   * Show preloader and upload video file
    *
    * @param {File} file - file that is currently uploading (from paste)
    * @returns {void}
@@ -426,7 +430,7 @@ export default class VideoTool {
   }
 
   /**
-   * Show preloader and upload image by target url
+   * Show preloader and upload video by target url
    *
    * @param {string} url - url pasted
    * @returns {void}
