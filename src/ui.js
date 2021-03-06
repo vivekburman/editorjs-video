@@ -148,6 +148,9 @@ export default class Ui {
       canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
       const image = canvas.toDataURL();
       const success = image.length > 100000;
+      if (self.nodes.videoEl) {
+        return false;
+      }
       if (success) {
         self.nodes.videoPreloader.style.backgroundImage = `url(${image})`;
         self.toggleStatus(Ui.status.UPLOADING);
@@ -156,6 +159,7 @@ export default class Ui {
     };
     video.addEventListener('timeupdate', timeupdate);
     video.preload = 'metadata';
+    video.crossOrigin = 'anonymous';
     video.src = src;
     // Load video in Safari / IE11
     video.muted = true;
@@ -183,7 +187,7 @@ export default class Ui {
     /**
      * Check for a source extension to compose element correctly: video tag for mp4, img — for others
      */
-    const tag = /\.mp4$/.test(url) ? 'VIDEO' : 'IMG';
+    const tag = 'VIDEO';
 
     const attributes = {
       src: url,
@@ -211,6 +215,7 @@ export default class Ui {
       attributes.loop = this.config.loop;
       attributes.muted = this.config.mute;
       attributes.playsinline = this.config.playsinline;
+      attributes.controls = true;
 
       /**
        * Change event to be listened

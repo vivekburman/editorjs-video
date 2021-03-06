@@ -126,10 +126,10 @@ export default class VideoTool {
       actions: config.actions || [],
       defaultElements: config.defaultElements || ['caption', 'withBorder', 'stretched', 'withBackground'],
       onRemove: config.onRemove || undefined,
-      autoplay: config.autoplay === undefined || true,
-      mute: config.mute === undefined || true,
-      loop: config.loop === undefined || true,
-      playsinline: config.playsinline === undefined || true
+      autoplay: config.autoplay === undefined ? true : config.autoplay,
+      mute: config.mute === undefined ? true : config.mute,
+      loop: config.loop === undefined ? true : config.loop,
+      playsinline: config.playsinline === undefined ? true : config.playsinline
     };
 
     /**
