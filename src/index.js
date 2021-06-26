@@ -95,8 +95,8 @@ export default class VideoTool {
    */
   static get toolbox() {
     return {
-      icon: ToolboxIcon,
-      title: 'Video',
+      // icon: ToolboxIcon,
+      // title: 'Video',
     };
   }
 
